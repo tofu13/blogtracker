@@ -22,6 +22,17 @@ async def load(request):
     return json({"data": "Lorem"})
 
 
+@app.route("/story")
+async def story(request):
+    topic = request.args.get("topic")
+    if topic:
+        cursor = db.cursor()
+        cursor.execute("SELECT date, text FROM track WHERE topic = ? ORDER BY date", [topic,])
+        return json([[record[0], record[1]] for record in cursor.fetchall()])
+    else:
+        return empty()
+
+
 @app.route("/save", methods=['POST'])
 async def save(request):
     db.execute("INSERT INTO track(id,date,topic,text) VALUES (NULL,?,?,?)",
