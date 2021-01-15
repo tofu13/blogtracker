@@ -27,8 +27,8 @@ async def story(request):
     topic = request.args.get("topic")
     if topic:
         cursor = db.cursor()
-        cursor.execute("SELECT date, text FROM track WHERE topic = ? ORDER BY date", [topic,])
-        return json([[record[0], record[1]] for record in cursor.fetchall()])
+        cursor.execute("SELECT id, date, text FROM track WHERE topic = ? ORDER BY date", [topic,])
+        return json(cursor.fetchall())
     else:
         return empty()
 
