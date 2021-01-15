@@ -1,25 +1,32 @@
 console.log("loaded");
 
 function setupEditor() {
-    ClassicEditor
-    .create( document.querySelector( '#editor' ) )
-    .then( editor => {
-        console.log( editor );
-        window.editor = editor;
+    tinymce.init({
+        selector: '.editable',
+        inline: false,
+        menubar: true,
+        setup: function (editor) {
+            //editor.on('init', function(e) {
+            //    e.target.hide();
+            //});
+            editor.on('keyup', function (e) {
+                console.log(e.getContent());
+            });
+        },
+        plugins : 'autoresize'
+    });
+}
 
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                console.log(this.responseText);
-                editor.setData(JSON.parse(this.responseText).data);
-                }
-            };
-        xhr.open('GET', '/load');
-        xhr.send();
-    } )
-    .catch( error => {
-        console.error( error );
-    } );
+function load() {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            console.log(this.responseText);
+            editor.setData(JSON.parse(this.responseText).data);
+            }
+        };
+    xhr.open('GET', '/load');
+    xhr.send();
 }
 
 function save(evt) {
@@ -37,7 +44,7 @@ function save(evt) {
         "date": document.getElementById("date").value,
         "text": text
         }));
-
+    evt.preventDefault();
 }
 
 function switchtab(evt) {
@@ -103,23 +110,39 @@ function loadStory() {
                 container.removeChild(container.firstChild);
             }
             for(var record of JSON.parse(this.responseText)) {
-                var paragraph = document.createElement("p");
-                paragraph.innerHTML="<h3>"+record[0]+"</h3>\n<p>"+record[1]+"</p>\n";
-                container.appendChild(paragraph)
+                var track = document.createElement("div")
+                track.setAttribute("id", "track#"+record[0]);
+                track.setAttribute("class", "track");
+
+                var date = document.createElement("h2");
+                date.innerHTML = record[1]
+
+                var paragraph = document.createElement("textaera");
+                paragraph.setAttribute("id", "content#"+record[0]);
+                paragraph.setAttribute("class", "editable");
+
+                paragraph.innerHTML = record[2];
+
+                track.appendChild(date);
+                track.appendChild(paragraph);
+
+                container.appendChild(track);
                 };
             }
+        setupEditor();
         }
     xhr.open('GET', '/story?topic='+this.value);
     xhr.send();
+
 }
 
 console.log("init");
+window.editor = null;
 
 setupMenu();
-setupEditor();
 setupTopics();
 
 
-document.getElementById("save").addEventListener('click', save);
+document.getElementById("main.form").addEventListener('submit', save);
 document.getElementById("story.select").addEventListener('change', loadStory);
 
