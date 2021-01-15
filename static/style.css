@@ -35,3 +35,6 @@
   .sidenav {padding-top: 15px;}
   .sidenav a {font-size: 18px;}
 }
+.track:hover {
+    background-color: aliceblue;
+}
