@@ -1,22 +1,5 @@
 console.log("loaded");
 
-function setupEditor() {
-    tinymce.init({
-        selector: '.editable',
-        inline: false,
-        menubar: true,
-        setup: function (editor) {
-            //editor.on('init', function(e) {
-            //    e.target.hide();
-            //});
-            editor.on('keyup', function (e) {
-                console.log(e.getContent());
-            });
-        },
-        plugins : 'autoresize'
-    });
-}
-
 function load() {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
@@ -111,14 +94,14 @@ function loadStory() {
             }
             for(var record of JSON.parse(this.responseText)) {
                 var track = document.createElement("div")
-                track.setAttribute("id", "track#"+record[0]);
+                track.setAttribute("trackNumber", record[0]);
                 track.setAttribute("class", "track");
 
                 var date = document.createElement("h2");
                 date.innerHTML = record[1]
 
                 var paragraph = document.createElement("textaera");
-                paragraph.setAttribute("id", "content#"+record[0]);
+                paragraph.setAttribute("id", "content-"+record[0]);
                 paragraph.setAttribute("class", "editable");
 
                 paragraph.innerHTML = record[2];
@@ -129,8 +112,20 @@ function loadStory() {
                 container.appendChild(track);
                 };
             }
-        setupEditor();
-        }
+        document.querySelectorAll(".track").forEach(function(e) {
+            e.addEventListener('click', function (k){
+                if (tinymce.activeEditor) {
+                    tinymce.activeEditor.destroy();
+                    }
+
+                tinymce.init({
+                    selector:"#content-"+k.currentTarget.getAttribute("tracknumber")
+                    })
+                })
+            })
+
+        };
+
     xhr.open('GET', '/story?topic='+this.value);
     xhr.send();
 
