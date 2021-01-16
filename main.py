@@ -11,15 +11,11 @@ jinja = SanicJinja2(app)
 db = sqlite3.connect("blogtracker.db")
 app.static('/static', './static')
 
+
 @app.route("/")
 @jinja.template("index.html")
 async def test(request):
     return {"hello": "world"}
-
-
-@app.route("/load")
-async def load(request):
-    return json({"data": "Lorem"})
 
 
 @app.route("/story")
@@ -55,13 +51,12 @@ async def save(request):
     return empty()
 
 
-
 @app.route("/topics")
 async def topics(request):
     cur = db.cursor()
     cur.execute("SELECT DISTINCT topic FROM track ORDER BY 1")
-    topics = [record for record in cur.fetchall()]
-    return json(topics)
+    return json([record for record in cur.fetchall()])
+
 
 @app.route("/favicon.ico")
 async def favicon(request):

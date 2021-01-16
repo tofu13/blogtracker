@@ -17,31 +17,15 @@ function editorSetting(selector) {
     };
 }
 
-function load() {
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            console.log(this.responseText);
-            editor.setData(JSON.parse(this.responseText).data);
-            }
-        };
-    xhr.open('GET', '/load');
-    xhr.send();
-}
-
 function save(evt) {
-    console.log(evt.target);
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-
+        // On succesful save
         }
     };
     xhr.open('PUT', '/save');
     xhr.send(JSON.stringify({
-        //"topic": document.getElementById("topic").value,
-        //"date": document.getElementById("date").value,
-        //"text": text,
         "track": parseInt(evt.target.getElement().parentElement.getAttribute('tracknumber')),
         "text": evt.target.getContent()
         }));
