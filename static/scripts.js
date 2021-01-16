@@ -1,5 +1,22 @@
 console.log("loaded");
 
+function editorSetting(selector) {
+    return {
+        selector: selector,
+        inline: false,
+        menubar: true,
+        setup: function (editor) {
+            //editor.on('init', function(e) {
+            //    e.target.hide();
+            //});
+            editor.on('change', function (e) {
+                save(e);
+            });
+        },
+        plugins : 'autoresize'
+    };
+}
+
 function load() {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
@@ -13,19 +30,20 @@ function load() {
 }
 
 function save(evt) {
-    const text = editor.getData();
-
+    console.log(evt.target);
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-        populateTopics();
+
         }
     };
-    xhr.open('POST', '/save');
+    xhr.open('PUT', '/save');
     xhr.send(JSON.stringify({
-        "topic": document.getElementById("topic").value,
-        "date": document.getElementById("date").value,
-        "text": text
+        //"topic": document.getElementById("topic").value,
+        //"date": document.getElementById("date").value,
+        //"text": text,
+        "track": parseInt(evt.target.getElement().parentElement.getAttribute('tracknumber')),
+        "text": evt.target.getContent()
         }));
     evt.preventDefault();
 }
@@ -118,12 +136,9 @@ function loadStory() {
                     tinymce.activeEditor.destroy();
                     }
 
-                tinymce.init({
-                    selector:"#content-"+k.currentTarget.getAttribute("tracknumber")
-                    })
+                tinymce.init(editorSetting("#content-"+k.currentTarget.getAttribute("tracknumber")));
                 })
             })
-
         };
 
     xhr.open('GET', '/story?topic='+this.value);

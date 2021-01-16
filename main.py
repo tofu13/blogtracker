@@ -44,6 +44,17 @@ async def save(request):
     db.commit()
     return empty()
 
+@app.route("/save", methods=['PUT'])
+async def save(request):
+    db.execute("UPDATE track SET text=? WHERE id=?",
+               (
+                   request.json["text"],
+                   request.json["track"]
+               ))
+    db.commit()
+    return empty()
+
+
 
 @app.route("/topics")
 async def topics(request):
