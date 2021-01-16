@@ -24,9 +24,8 @@ function save(evt) {
         // On succesful save
         }
     };
-    xhr.open('PUT', '/save');
+    xhr.open('PUT', '/tracks/'+parseInt(evt.target.getElement().parentElement.getAttribute('tracknumber')));
     xhr.send(JSON.stringify({
-        "track": parseInt(evt.target.getElement().parentElement.getAttribute('tracknumber')),
         "text": evt.target.getContent()
         }));
     evt.preventDefault();
@@ -125,7 +124,7 @@ function loadStory() {
             })
         };
 
-    xhr.open('GET', '/story?topic='+this.value);
+    xhr.open('GET', '/tracks?topic='+this.value);
     xhr.send();
 
 }

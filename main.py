@@ -18,7 +18,7 @@ async def test(request):
     return {"hello": "world"}
 
 
-@app.route("/story")
+@app.route("/tracks")
 async def story(request):
     topic = request.args.get("topic")
     if topic:
@@ -29,7 +29,7 @@ async def story(request):
         return empty()
 
 
-@app.route("/save", methods=['POST'])
+@app.route("/tracks", methods=['POST'])
 async def save(request):
     db.execute("INSERT INTO track(id,date,topic,text) VALUES (NULL,?,?,?)",
                (
@@ -40,12 +40,12 @@ async def save(request):
     db.commit()
     return empty()
 
-@app.route("/save", methods=['PUT'])
-async def save(request):
+@app.route("/tracks/<tracknumber:int>", methods=['PUT'])
+async def save(request, tracknumber):
     db.execute("UPDATE track SET text=? WHERE id=?",
                (
                    request.json["text"],
-                   request.json["track"]
+                   tracknumber
                ))
     db.commit()
     return empty()
