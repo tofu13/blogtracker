@@ -24,9 +24,11 @@ function save(evt) {
         // On succesful save
         }
     };
-    xhr.open('PUT', '/tracks/'+parseInt(evt.target.getElement().parentElement.getAttribute('tracknumber')));
+    var tracknumber = evt.target.getElement().parentElement.getAttribute('tracknumber');
+    xhr.open('PUT', '/tracks/' + tracknumber);
     xhr.send(JSON.stringify({
-        "text": evt.target.getContent()
+        "text": evt.target.getContent(),
+        "date": document.getElementById("date-" + tracknumber).value
         }));
     evt.preventDefault();
 }
@@ -95,11 +97,14 @@ function loadStory() {
             }
             for(var record of JSON.parse(this.responseText)) {
                 var track = document.createElement("div")
-                track.setAttribute("trackNumber", record[0]);
+                track.setAttribute("tracknumber", record[0]);
                 track.setAttribute("class", "track");
 
-                var date = document.createElement("h2");
-                date.innerHTML = record[1]
+                var date = document.createElement("input");
+                date.setAttribute("type","date");
+                date.setAttribute("id", "date-"+record[0]);
+                date.readOnly = true;
+                date.value = record[1]
 
                 var paragraph = document.createElement("textaera");
                 paragraph.setAttribute("id", "content-"+record[0]);
@@ -119,7 +124,9 @@ function loadStory() {
                     tinymce.activeEditor.destroy();
                     }
 
-                tinymce.init(editorSetting("#content-"+k.currentTarget.getAttribute("tracknumber")));
+                var tracknumber = k.currentTarget.getAttribute("tracknumber");
+                document.getElementById("date-"+tracknumber).readOnly = false;
+                tinymce.init(editorSetting("#content-"+tracknumber));
                 })
             })
         };

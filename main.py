@@ -8,7 +8,7 @@ import sqlite3
 app = Sanic(__name__)
 jinja = SanicJinja2(app)
 
-db = sqlite3.connect("blogtracker.db")
+db = sqlite3.connect("blogtracker.db", isolation_level=None) # None -> autocommit
 app.static('/static', './static')
 
 
@@ -23,7 +23,7 @@ async def story(request):
     topic = request.args.get("topic")
     if topic:
         cursor = db.cursor()
-        cursor.execute("SELECT id, date, text FROM track WHERE topic = ? ORDER BY date", [topic,])
+        cursor.execute("SELECT id, date, text FROM track WHERE topic = ? ORDER BY date DESC", [topic,])
         return json(cursor.fetchall())
     else:
         return empty()
@@ -31,23 +31,25 @@ async def story(request):
 
 @app.route("/tracks", methods=['POST'])
 async def save(request):
-    db.execute("INSERT INTO track(id,date,topic,text) VALUES (NULL,?,?,?)",
+    cursor = db.cursor()
+    cursor.execute("INSERT INTO track(id,date,topic,text) VALUES (NULL,?,?,?)",
                (
                    request.json["date"],
                    request.json["topic"],
                    request.json["text"],
                ))
-    db.commit()
-    return empty()
+    return json({"track": cursor.lastrowid})
+
 
 @app.route("/tracks/<tracknumber:int>", methods=['PUT'])
 async def save(request, tracknumber):
-    db.execute("UPDATE track SET text=? WHERE id=?",
+    cursor = db.cursor()
+    cursor.execute("UPDATE track SET date=?, text=? WHERE id=?",
                (
+                   request.json["date"],
                    request.json["text"],
                    tracknumber
                ))
-    db.commit()
     return empty()
 
 
