@@ -77,53 +77,49 @@ function populateTopics(topics) {
 }
 
 function setupTopics() {
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            populateTopics(JSON.parse(this.responseText));
-            }
-        }
-    xhr.open('GET', '/topics');
-    xhr.send();
+    fetch('/topics').then(
+        response => response.json()
+        ).then(
+        json => populateTopics(json)
+        )
 }
 
-function loadStory(evt, tracknumber) {
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            var container = document.getElementById("story.container");
-            while(container.firstChild) {
-                container.removeChild(container.firstChild);
-            }
-            for(var record of JSON.parse(this.responseText)) {
-                var track = document.createElement("div")
-                track.setAttribute("tracknumber", record[0]);
-                track.setAttribute("class", "track");
-
-                var date = document.createElement("input");
-                date.setAttribute("type","date");
-                date.setAttribute("id", "date-"+record[0]);
-                date.readOnly = true;
-                date.value = record[1]
-
-                var paragraph = document.createElement("textaera");
-                paragraph.setAttribute("id", "content-"+record[0]);
-                paragraph.setAttribute("class", "editable");
-
-                paragraph.innerHTML = record[2];
-
-                track.appendChild(date);
-                track.appendChild(paragraph);
-
-                container.appendChild(track);
-                track.addEventListener('click', function (k){
-                    openEditor(k.currentTarget.getAttribute("tracknumber"));
-                    })
-            };
+function loadStory(evt) {
+    fetch('/tracks?topic='+document.getElementById("story.select").value).then(
+    response => response.json())
+    .then(
+    function (json) {
+        var container = document.getElementById("story.container");
+        while(container.firstChild) {
+            container.removeChild(container.firstChild);
         }
+        for(var record of json) {
+            var track = document.createElement("div")
+            track.setAttribute("tracknumber", record[0]);
+            track.setAttribute("class", "track");
+
+            var date = document.createElement("input");
+            date.setAttribute("type","date");
+            date.setAttribute("id", "date-"+record[0]);
+            date.readOnly = true;
+            date.value = record[1]
+
+            var paragraph = document.createElement("textaera");
+            paragraph.setAttribute("id", "content-"+record[0]);
+            paragraph.setAttribute("class", "editable");
+
+            paragraph.innerHTML = record[2];
+
+            track.appendChild(date);
+            track.appendChild(paragraph);
+
+            container.appendChild(track);
+            track.addEventListener('click', function (k){
+                openEditor(k.currentTarget.getAttribute("tracknumber"));
+                })
+        };
     }
-    xhr.open('GET', '/tracks?topic='+document.getElementById("story.select").value);
-    xhr.send();
+    )
 }
 
 function loadStoryEvent(evt){
@@ -144,20 +140,19 @@ function closeEditor() {
 }
 
 function newTrack() {
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-        loadStory().then( function () {;
-        var tracknumber = parseInt(JSON.parse(this.responseText).track);
-        console.log(tracknumber);
-        openEditor(null, tracknumber)
-        })
+    fetch('/tracks/', {
+        method: 'POST',
+        body: JSON.stringify({"topic": document.getElementById("story.select").value})
         }
-    };
-    xhr.open('POST', '/tracks/');
-    xhr.send(JSON.stringify({
-        "topic": document.getElementById("story.select").value,
-        }));
+    ).then(
+    response => response.json()
+    ).then(function (json) {
+        loadStory()
+        var tracknumber = json.track;
+         console.log(tracknumber);
+        openEditor(tracknumber);
+        }
+    )
 }
 
 console.log("init");
@@ -165,7 +160,6 @@ window.editor = null;
 
 setupMenu();
 setupTopics();
-
 
 document.getElementById("main.form").addEventListener('submit', save);
 document.getElementById("story.select").addEventListener('change', loadStoryEvent);
