@@ -87,7 +87,7 @@ function setupTopics() {
     xhr.send();
 }
 
-function loadStory() {
+function loadStory(evt, tracknumber) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
@@ -116,24 +116,48 @@ function loadStory() {
                 track.appendChild(paragraph);
 
                 container.appendChild(track);
-                };
-            }
-        document.querySelectorAll(".track").forEach(function(e) {
-            e.addEventListener('click', function (k){
-                if (tinymce.activeEditor) {
-                    tinymce.activeEditor.destroy();
-                    }
-
-                var tracknumber = k.currentTarget.getAttribute("tracknumber");
-                document.getElementById("date-"+tracknumber).readOnly = false;
-                tinymce.init(editorSetting("#content-"+tracknumber));
-                })
-            })
-        };
-
-    xhr.open('GET', '/tracks?topic='+this.value);
+                track.addEventListener('click', function (k){
+                    openEditor(k.currentTarget.getAttribute("tracknumber"));
+                    })
+            };
+        }
+    }
+    xhr.open('GET', '/tracks?topic='+document.getElementById("story.select").value);
     xhr.send();
+}
 
+function loadStoryEvent(evt){
+    console.log(evt);
+    loadStory(evt);
+}
+
+function openEditor(tracknumber) {
+    closeEditor();
+    document.getElementById("date-"+tracknumber).readOnly = false;
+    tinymce.init(editorSetting("#content-"+tracknumber));
+}
+
+function closeEditor() {
+    if (tinymce.activeEditor) {
+        tinymce.activeEditor.destroy();
+        }
+}
+
+function newTrack() {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+        loadStory().then( function () {;
+        var tracknumber = parseInt(JSON.parse(this.responseText).track);
+        console.log(tracknumber);
+        openEditor(null, tracknumber)
+        })
+        }
+    };
+    xhr.open('POST', '/tracks/');
+    xhr.send(JSON.stringify({
+        "topic": document.getElementById("story.select").value,
+        }));
 }
 
 console.log("init");
@@ -144,5 +168,6 @@ setupTopics();
 
 
 document.getElementById("main.form").addEventListener('submit', save);
-document.getElementById("story.select").addEventListener('change', loadStory);
+document.getElementById("story.select").addEventListener('change', loadStoryEvent);
+document.getElementById("newtrack").addEventListener('click', newTrack);
 
