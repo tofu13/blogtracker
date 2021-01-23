@@ -32,13 +32,11 @@ async def story(request):
 @app.route("/tracks", methods=['POST'])
 async def save(request):
     cursor = db.cursor()
-    cursor.execute("INSERT INTO track(id,date,topic,text) VALUES (NULL,?,?,?)",
+    cursor.execute("INSERT INTO track(id,date,topic,text) VALUES (NULL,date('now'),?,'')",
                (
-                   request.json["date"],
                    request.json["topic"],
-                   request.json["text"],
                ))
-    return json({"track": cursor.lastrowid})
+    return json(cursor.lastrowid)
 
 
 @app.route("/tracks/<tracknumber:int>", methods=['PUT'])

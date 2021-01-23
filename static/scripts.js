@@ -84,42 +84,38 @@ function setupTopics() {
         )
 }
 
-function loadStory(evt) {
-    fetch('/tracks?topic='+document.getElementById("story.select").value).then(
-    response => response.json())
-    .then(
-    function (json) {
-        var container = document.getElementById("story.container");
-        while(container.firstChild) {
-            container.removeChild(container.firstChild);
-        }
-        for(var record of json) {
-            var track = document.createElement("div")
-            track.setAttribute("tracknumber", record[0]);
-            track.setAttribute("class", "track");
-
-            var date = document.createElement("input");
-            date.setAttribute("type","date");
-            date.setAttribute("id", "date-"+record[0]);
-            date.readOnly = true;
-            date.value = record[1]
-
-            var paragraph = document.createElement("textaera");
-            paragraph.setAttribute("id", "content-"+record[0]);
-            paragraph.setAttribute("class", "editable");
-
-            paragraph.innerHTML = record[2];
-
-            track.appendChild(date);
-            track.appendChild(paragraph);
-
-            container.appendChild(track);
-            track.addEventListener('click', function (k){
-                openEditor(k.currentTarget.getAttribute("tracknumber"));
-                })
-        };
+async function loadStory(evt) {
+    response = await fetch('/tracks?topic='+document.getElementById("story.select").value)
+    var container = document.getElementById("story.container");
+    while(container.firstChild) {
+        container.removeChild(container.firstChild);
     }
-    )
+    for(var record of await response.json()) {
+        var track = document.createElement("div")
+        track.setAttribute("tracknumber", record[0]);
+        track.setAttribute("class", "track");
+
+        var date = document.createElement("input");
+        date.setAttribute("type","date");
+        date.setAttribute("id", "date-"+record[0]);
+        date.readOnly = true;
+        date.value = record[1]
+
+        var paragraph = document.createElement("textaera");
+        paragraph.setAttribute("id", "content-"+record[0]);
+        paragraph.setAttribute("class", "editable");
+
+        paragraph.innerHTML = record[2];
+
+        track.appendChild(date);
+        track.appendChild(paragraph);
+
+        container.appendChild(track);
+        track.addEventListener('click', function (k){
+            openEditor(k.currentTarget.getAttribute("tracknumber"));
+            })
+    };
+    console.log("finish load story");
 }
 
 function loadStoryEvent(evt){
@@ -128,7 +124,7 @@ function loadStoryEvent(evt){
 }
 
 function openEditor(tracknumber) {
-    closeEditor();
+    closeEditor()
     document.getElementById("date-"+tracknumber).readOnly = false;
     tinymce.init(editorSetting("#content-"+tracknumber));
 }
@@ -139,20 +135,16 @@ function closeEditor() {
         }
 }
 
-function newTrack() {
-    fetch('/tracks/', {
+async function newTrack() {
+    response = await fetch('/tracks/', {
         method: 'POST',
         body: JSON.stringify({"topic": document.getElementById("story.select").value})
-        }
-    ).then(
-    response => response.json()
-    ).then(function (json) {
-        loadStory()
-        var tracknumber = json.track;
-         console.log(tracknumber);
-        openEditor(tracknumber);
-        }
-    )
+        })
+
+    var tracknumber = await response.json();
+    await loadStory();
+    console.log(tracknumber);
+    openEditor(tracknumber);
 }
 
 console.log("init");
