@@ -60,11 +60,19 @@ function removeOptions(selectElement) {
 function populateTopics(topics) {
     var selectElement = document.getElementById("story.select");
     removeOptions(selectElement);
+
     var opt = document.createElement("option");
     opt.value= "null";
     opt.innerHTML = "Choose topic";
     opt.style = "display:none";
     selectElement.appendChild(opt);
+
+    var opt = document.createElement("option");
+    opt.value= "null";
+    opt.innerHTML = "* Create new topic *";
+    opt.style = "font-style: italic"
+    selectElement.appendChild(opt);
+
     for(var element of topics)
         {
            var opt = document.createElement("option");
@@ -76,12 +84,9 @@ function populateTopics(topics) {
         }
 }
 
-function setupTopics() {
-    fetch('/topics').then(
-        response => response.json()
-        ).then(
-        json => populateTopics(json)
-        )
+async function setupTopics() {
+    var response = await fetch('/topics');
+    populateTopics(await response.json());
 }
 
 async function loadStory(evt) {
@@ -115,12 +120,17 @@ async function loadStory(evt) {
             openEditor(k.currentTarget.getAttribute("tracknumber"));
             })
     };
-    console.log("finish load story");
+    closeNewTopicForm();
 }
 
 function loadStoryEvent(evt){
     console.log(evt);
-    loadStory(evt);
+    if (evt.target.value == "null"){
+        document.getElementById("newTopic").style.display="block";
+    }
+    else {
+        loadStory(evt);
+    }
 }
 
 function openEditor(tracknumber) {
@@ -147,6 +157,25 @@ async function newTrack() {
     openEditor(tracknumber);
 }
 
+async function createNewTopic(evt) {
+    var topicName = document.getElementById("newTopicName").value;
+    if (topicName != ""){
+    response = await fetch('/topics/', {
+        method: 'POST',
+        body: JSON.stringify(topicName)
+        })
+    }
+    closeNewTopicForm();
+    document.getElementById("newTopicName").value = "";
+    await setupTopics();
+    document.getElementById("story.select").value = topicName;
+    await newTrack();
+}
+
+function closeNewTopicForm() {
+    document.getElementById("newTopic").style.display = "none";
+}
+
 console.log("init");
 window.editor = null;
 
@@ -156,4 +185,4 @@ setupTopics();
 document.getElementById("main.form").addEventListener('submit', save);
 document.getElementById("story.select").addEventListener('change', loadStoryEvent);
 document.getElementById("newtrack").addEventListener('click', newTrack);
-
+document.getElementById("newTopic").addEventListener('submit', createNewTopic);

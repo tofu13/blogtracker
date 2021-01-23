@@ -54,8 +54,22 @@ async def save(request, tracknumber):
 @app.route("/topics")
 async def topics(request):
     cur = db.cursor()
-    cur.execute("SELECT DISTINCT topic FROM track ORDER BY 1")
+    cur.execute("SELECT name FROM topic ORDER BY 1")
     return json([record for record in cur.fetchall()])
+
+
+@app.route("/topics", methods=['POST'])
+async def newtopic(request):
+    cursor = db.cursor()
+    try:
+        cursor.execute("INSERT INTO topic(name) VALUES (?)",
+                   (
+                       request.json,
+                   ))
+    except sqlite3.Error as err:
+        pass
+    return empty()
+
 
 
 @app.route("/favicon.ico")
