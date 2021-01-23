@@ -6,9 +6,6 @@ function editorSetting(selector) {
         inline: false,
         menubar: true,
         setup: function (editor) {
-            //editor.on('init', function(e) {
-            //    e.target.hide();
-            //});
             editor.on('change', function (e) {
                 save(e);
             });
@@ -17,20 +14,15 @@ function editorSetting(selector) {
     };
 }
 
-function save(evt) {
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-        // On succesful save
-        }
-    };
+async function save(evt) {
     var tracknumber = evt.target.getElement().parentElement.getAttribute('tracknumber');
-    xhr.open('PUT', '/tracks/' + tracknumber);
-    xhr.send(JSON.stringify({
+    await fetch('/tracks/' + tracknumber, {
+        method: 'PUT',
+        body: JSON.stringify({
         "text": evt.target.getContent(),
         "date": document.getElementById("date-" + tracknumber).value
-        }));
-    evt.preventDefault();
+        })
+    })
 }
 
 function switchtab(evt) {
