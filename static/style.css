@@ -35,6 +35,17 @@
   .sidenav {padding-top: 15px;}
   .sidenav a {font-size: 18px;}
 }
+
+.storyContainer {
+    height: 80vh;
+    overflow-y: auto;
+}
+
+.track {
+    border-bottom: 1px dashed grey;
+    margin: 10px 10px 0px 0px;
+}
+
 .track:hover {
     background-color: aliceblue;
 }
