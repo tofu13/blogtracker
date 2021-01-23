@@ -133,6 +133,8 @@ function openEditor(tracknumber) {
 
 function closeEditor() {
     if (tinymce.activeEditor) {
+        var tracknumber = tinymce.activeEditor.getElement().parentElement.getAttribute("tracknumber");
+        document.getElementById("date-"+tracknumber).readOnly = true;
         tinymce.activeEditor.destroy();
         }
 }
