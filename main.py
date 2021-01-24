@@ -1,21 +1,16 @@
 from sanic import Sanic
-from sanic.response import  empty
-from sanic.response import json
-from sanic_jinja2 import SanicJinja2
+from sanic.response import empty, json, redirect
 import sqlite3
 
-
 app = Sanic(__name__)
-jinja = SanicJinja2(app)
 
 db = sqlite3.connect("blogtracker.db", isolation_level=None) # None -> autocommit
 app.static('/static', './static')
 
 
 @app.route("/")
-@jinja.template("index.html")
 async def test(request):
-    return {"hello": "world"}
+    return redirect("/static/index.html")
 
 
 @app.route("/tracks")
