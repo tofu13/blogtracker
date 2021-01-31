@@ -122,7 +122,10 @@ async function loadStory(evt) {
         del.addEventListener('click', function (k){
             deleteTrack(k.currentTarget.getAttribute("tracknumber"));
             })
-    };
+        date.addEventListener('change', function (k){
+            tinymce.activeEditor.fire('change');
+            })
+     };
     closeNewTopicForm();
 }
 
