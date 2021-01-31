@@ -46,6 +46,16 @@ async def save(request, tracknumber):
     return empty()
 
 
+@app.route("/tracks/<tracknumber:int>", methods=['DELETE'])
+async def delete(request, tracknumber):
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM track WHERE id=?",
+               (
+                   tracknumber,
+               ))
+    return empty()
+
+
 @app.route("/topics")
 async def topics(request):
     cur = db.cursor()

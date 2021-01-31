@@ -82,7 +82,8 @@ async function setupTopics() {
 }
 
 async function loadStory(evt) {
-    response = await fetch('/tracks?topic='+document.getElementById("story.select").value)
+    closeEditor();
+    response = await fetch('/tracks?topic='+document.getElementById("story.select").value);
     var container = document.getElementById("story.container");
     while(container.firstChild) {
         container.removeChild(container.firstChild);
@@ -98,6 +99,12 @@ async function loadStory(evt) {
         date.readOnly = true;
         date.value = record[1]
 
+        var del = document.createElement("button");
+        del.innerHTML = "Delete";
+        del.setAttribute("id", "delete-"+record[0]);
+        del.style = "display: None";
+        del.setAttribute("tracknumber", record[0]);
+
         var paragraph = document.createElement("textaera");
         paragraph.setAttribute("id", "content-"+record[0]);
         paragraph.setAttribute("class", "editable");
@@ -105,11 +112,15 @@ async function loadStory(evt) {
         paragraph.innerHTML = record[2];
 
         track.appendChild(date);
+        track.appendChild(del);
         track.appendChild(paragraph);
 
         container.appendChild(track);
         track.addEventListener('click', function (k){
             openEditor(k.currentTarget.getAttribute("tracknumber"));
+            })
+        del.addEventListener('click', function (k){
+            deleteTrack(k.currentTarget.getAttribute("tracknumber"));
             })
     };
     closeNewTopicForm();
@@ -128,6 +139,7 @@ function loadStoryEvent(evt){
 function openEditor(tracknumber) {
     closeEditor()
     document.getElementById("date-"+tracknumber).readOnly = false;
+    document.getElementById("delete-"+tracknumber).style.display = "block";
     tinymce.init(editorSetting("#content-"+tracknumber));
 }
 
@@ -135,6 +147,7 @@ function closeEditor() {
     if (tinymce.activeEditor) {
         var tracknumber = tinymce.activeEditor.getElement().parentElement.getAttribute("tracknumber");
         document.getElementById("date-"+tracknumber).readOnly = true;
+        document.getElementById("delete-"+tracknumber).style.display = "none";
         tinymce.activeEditor.destroy();
         }
 }
@@ -149,6 +162,13 @@ async function newTrack() {
     await loadStory();
     console.log(tracknumber);
     openEditor(tracknumber);
+}
+
+async function deleteTrack(tracknumber) {
+    response = await fetch('/tracks/' + tracknumber, {
+        method: 'DELETE'
+        })
+    await loadStory();
 }
 
 async function createNewTopic(evt) {
