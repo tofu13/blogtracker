@@ -7,6 +7,7 @@ _create_db = False if exists("blogtracker.db") else True
 db = sqlite3.connect("blogtracker.db", isolation_level=None)  # None -> autocommit
 
 if _create_db:
+    # TODO: read and execute sql script in file "create_db.sql" instead of hard coding here
     db.execute("""
     CREATE TABLE topic (name text not null primary key);
     """)
